@@ -1,32 +1,79 @@
-pipeline {
+import java.text.SimpleDateFormat
+
+ 
+
+def dateFormat = new SimpleDateFormat("yyyyMMddHHmm")
+def date = new Date()
+def timestamp = dateFormat.format(date).toString()
+
+ 
+
+pipeline{
+    //En el servidor se debe dejar activo el agent con label NodoWindows10Advance, de manera local agent any y el otro comentado
     agent any
+    //agent
 
-    stages {
-        stage ('Compile Stage') {
+ 
 
-            steps {
-                withMaven(maven : 'M3') {
-                    bat 'mvn clean compile'
-                }
+    stages{
+        stage('Actualizar fuentes Nodo Windows') {
+             steps{
+                 git url: 'https://github.com/cris2236/Inventario.git', branch: 'master'
             }
         }
 
-        stage ('Testing Stage') {
+ 
 
-            steps {
-                withMaven(maven : 'M3') {
-                    bat 'mvn test'
+        stage('Test_GUI_Junit'){
+                steps{
+                    script{
+                        try{
+                            //sh aplica para servidor y bat para pruebas locales
+                            //sh ("gradle clean test aggregate")
+                            //bat 'gradle clean test aggregate'
+                            bat "mvn -f Fuente/CreacionYDesvinculacionUsuarios/pom.xml -Dtest=\"${APLICACION}\" test serenity:aggregate"
+                             echo 'Ha ejecutado sin fallo hasta test junit'
+                        }
+                        catch(ex)
+                        {    
+                            echo 'Finalizo ejecucion de framework junit con fallos'
+                            error('Failed')
+                        }
+                    }
                 }
             }
-        }
 
+ 
 
-        stage ('Deployment Stage') {
-            steps {
-                withMaven(maven : 'M3') {
-                    bat 'mvn deploy'
+        stage('HtmlReport'){
+                steps{
+                    script{
+                        try{
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'Fuente\\CreacionYDesvinculacionUsuarios\\target\\site\\serenity', reportFiles: 'index.html', reportName: 'Plantilla', reportTitles: ''])
+                            echo 'Reporte Html realizado con exito'
+                        }
+                        catch(ex)
+                        {    
+                            echo 'Reporte Html realizado con Fallos'
+                            error('Failed')
+                        }
+                    }
+                }
+            }            
+        stage('BackupEvidencias'){
+                steps{
+                    script{
+                        try{
+                            bat " rename \"${WORKSPACE}\\target\\site\\serenity\" serenity_${timestamp}"
+                             echo 'Backup de evidencias realizado con exito'
+                        }
+                        catch(ex)
+                        {    
+                            echo 'Backup de evidencias realizado con fallos'
+                            error('Failed')
+                        }
+                    }
                 }
             }
-        }
-    }
+        }    
 }
