@@ -18,13 +18,13 @@ pipeline{
     stages{
         stage('Actualizar fuentes Nodo Windows') {
              steps{
-                 git url: 'https://github.com/cris2236/Inventario.git', credentialsId: '689d31d7-166b-4d30-b4f4-d0b25a2de3d7', branch: 'master'
+                 git url: 'https://github.com/cris2236/Inventario.git', branch: 'master'
             }
         }
 
  
 
-        stage('Test_GUI_Junit'){
+        /*stage('Test_GUI_Junit'){
                 steps{
                     script{
                         try{
@@ -53,7 +53,7 @@ pipeline{
                             echo 'Reporte Html realizado con exito'
                         }
                         catch(ex)
-                        {    
+                        {
                             echo 'Reporte Html realizado con Fallos'
                             error('Failed')
                         }
@@ -75,5 +75,5 @@ pipeline{
                     }
                 }
             }
-        }    
+        }    */
 }
