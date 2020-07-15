@@ -18,7 +18,7 @@ pipeline{
     stages{
         stage('Actualizar fuentes Nodo Windows') {
              steps{
-                 git url: 'https://Dev-Choucair@dev.azure.com/Dev-Choucair/RPA_CreacionYRetiroDeUsuarios/_git/RPA_CreacionYRetiroDeUsuarios', credentialsId: '689d31d7-166b-4d30-b4f4-d0b25a2de3d7', branch: 'master'
+                 git url: 'https://github.com/cris2236/Inventario.git', credentialsId: '689d31d7-166b-4d30-b4f4-d0b25a2de3d7', branch: 'master'
             }
         }
 
