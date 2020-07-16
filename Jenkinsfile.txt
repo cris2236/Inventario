@@ -1,24 +1,18 @@
-import java.text.SimpleDateFormat
+node('remote') {
+    // Note : this step is only needed if you're using direct Groovy scripting
+    stage 'Checkout Git project'
+    git url: 'https://github.com/jglick/simple-maven-project-with-tests.git'
+    def appVersion = version()
+    if (appVersion) {
+        echo "Building version ${appVersion}"
+    }
 
- 
-
-def dateFormat = new SimpleDateFormat("yyyyMMddHHmm")
-def date = new Date()
-def timestamp = dateFormat.format(date).toString()
-
- 
-
-pipeline{
-    //En el servidor se debe dejar activo el agent con label NodoWindows10Advance, de manera local agent any y el otro comentado
-    agent any
-    //agent
-
- 
-
-    stages{
-        stage('Actualizar fuentes Nodo Windows') {
-             steps{
-                 git url: 'https://github.com/cris2236/Inventario.git', branch: 'master'
-            }
-        } 
+    stage 'Build Maven project'
+    def mvnHome = tool 'M3'
+    sh "${mvnHome}/bin/mvn -B -Dmaven.test.failure.ignore verify"
+    step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
+}
+def version() {
+    def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
+    matcher ? matcher[0][1] : null
 }
